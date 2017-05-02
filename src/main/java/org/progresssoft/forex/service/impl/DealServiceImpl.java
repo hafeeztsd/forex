@@ -34,6 +34,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class DealServiceImpl implements DealService {
 
+	private static final String EMPTY_VALUE = "";
+
 	private static final String SEPARATOR = ",";
 
 	private static final int AMOUNT = 4;
@@ -105,9 +107,11 @@ public class DealServiceImpl implements DealService {
 
 	private static Function<String, ValidDeal> mapToDeal = (line) -> {
 		String[] deal = line.split(SEPARATOR);
-
-		return new ValidDeal(deal[DEAL_UNIQUE_ID], deal[FROM_CURRENCY], deal[TO_CURRENCY], deal[TIMESTAMP],
-				Float.valueOf(deal[AMOUNT]));
+		return new ValidDeal(deal[DEAL_UNIQUE_ID] == null ? EMPTY_VALUE : deal[DEAL_UNIQUE_ID],
+				deal[FROM_CURRENCY] == null ? EMPTY_VALUE : deal[FROM_CURRENCY],
+				deal[TO_CURRENCY] == null ? EMPTY_VALUE : deal[TO_CURRENCY],
+				deal[TIMESTAMP] == null ? EMPTY_VALUE : deal[TIMESTAMP],
+				deal.length - 1 >= AMOUNT ? (deal[AMOUNT] == null ? 0 : Float.valueOf(deal[AMOUNT])) : 0);
 	};
 
 }
