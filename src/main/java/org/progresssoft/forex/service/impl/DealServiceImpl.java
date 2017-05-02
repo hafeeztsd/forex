@@ -3,14 +3,23 @@ package org.progresssoft.forex.service.impl;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import org.progresssoft.forex.exception.ForexErrorCode;
 import org.progresssoft.forex.exception.ForexException;
-import org.progresssoft.forex.model.Deal;
-import org.progresssoft.forex.repository.DealRespository;
+import org.progresssoft.forex.model.DealSource;
+import org.progresssoft.forex.model.InvalidDeal;
+import org.progresssoft.forex.model.ValidDeal;
+import org.progresssoft.forex.repository.DealSourceRespository;
+import org.progresssoft.forex.repository.InvalidDealRespository;
+import org.progresssoft.forex.repository.ValidDealRespository;
 import org.progresssoft.forex.service.DealService;
 import org.progresssoft.forex.utils.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,37 +49,65 @@ public class DealServiceImpl implements DealService {
 	private static final Logger LOGGER = Logger.getLogger(DealServiceImpl.class.getName());
 
 	@Autowired
-	DealRespository dealRespository;
+	ValidDealRespository validDealRespository;
 
-	public Deal save(Deal deal) {
-		return dealRespository.save(deal);
-	}
+	@Autowired
+	InvalidDealRespository invalidDealRespository;
+
+	@Autowired
+	DealSourceRespository dealSourceRespository;
 
 	@Override
 	public void loadDeals(InputStream is, String source) throws ForexException {
+
+		DealSource dealSource = dealSourceRespository.findOne(source);
+
+		if (dealSource != null) {
+			throw new ForexException(ForexErrorCode.ALREADY_UPLOADED);
+		}
+
 		Timer timer = new Timer();
 		timer.start();
+		List<InvalidDeal> invalidDeals = new ArrayList<>();
 		try (BufferedReader br = new BufferedReader(new InputStreamReader(is))) {
-			List<Deal> deals = br.lines().map(mapToDeal).filter(deal -> deal.getId() != null)
+
+			List<ValidDeal> validDeals = br.lines().map(mapToDeal).filter(deal -> isValidDeal(deal, invalidDeals))
 					.collect(Collectors.toList());
-			Logger.getLogger(DealServiceImpl.class.getName()).info("Deals to be loaded into DB are " + deals.size());
-			dealRespository.save(deals);
+
+			LOGGER.info("Valid Deals to be loaded into DB are " + validDeals.size());
+			LOGGER.info("Invalid Deals to be loaded into DB are " + invalidDeals.size());
+
+			Timestamp timestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
+			dealSource = new DealSource(source, (validDeals.size() + invalidDeals.size()), validDeals.size(),
+					invalidDeals.size(), timestamp.toString());
+
+			dealSourceRespository.save(dealSource);
+			validDealRespository.save(validDeals);
+			invalidDealRespository.save(invalidDeals);
+
 			timer.stop();
-			LOGGER.info("Time taken to load " + deals.size() + " is " + timer.getSconds() + " seconds.");
+			LOGGER.info("Time taken to load " + validDeals.size() + " is " + timer.getSconds() + " seconds.");
 		} catch (Exception e) {
-			e.printStackTrace();
-			throw new ForexException("Error while loading file " + source + " to database.");
+			LOGGER.log(Level.SEVERE, e.getMessage(), e);
+			throw new ForexException(ForexErrorCode.SYSTEM_ERROR, e);
 		}
 
 	}
 
-	private static Function<String, Deal> mapToDeal = (line) -> {
+	private boolean isValidDeal(ValidDeal validDeal, List<InvalidDeal> invalidDeals) {
+		if (!validDeal.isValidDeal()) {
+			invalidDeals.add(new InvalidDeal(validDeal.getId(), validDeal.getFromCurrencyCode(),
+					validDeal.getToCurrencyCode(), validDeal.getTimestamp(), validDeal.getAmount()));
+			return false;
+		}
+		return true;
+	}
+
+	private static Function<String, ValidDeal> mapToDeal = (line) -> {
 		String[] deal = line.split(SEPARATOR);
 
-		return new Deal(deal[DEAL_UNIQUE_ID], deal[FROM_CURRENCY], deal[TO_CURRENCY],
-				deal[TIMESTAMP], Float.valueOf(deal[AMOUNT]));
+		return new ValidDeal(deal[DEAL_UNIQUE_ID], deal[FROM_CURRENCY], deal[TO_CURRENCY], deal[TIMESTAMP],
+				Float.valueOf(deal[AMOUNT]));
 	};
-	
-	
-	
+
 }

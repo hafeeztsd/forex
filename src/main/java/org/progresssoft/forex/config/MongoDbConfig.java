@@ -25,7 +25,6 @@ public class MongoDbConfig {
 	@Bean
 	public Mongo mongo() throws Exception {
 		Mongo mongo = new MongoClient(applicationProperties.getDbHost(), applicationProperties.getDbPort());
-		mongo.dropDatabase(applicationProperties.getDbName());
 		return mongo;
 	}
 

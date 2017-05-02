@@ -1,6 +1,7 @@
 package org.progresssoft.forex.repository;
 
 import org.progresssoft.forex.model.Deal;
+import org.progresssoft.forex.model.ValidDeal;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
@@ -10,6 +11,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
  * @author hafeeztsd
  *
  */
-public interface DealRespository extends MongoRepository<Deal, String> {
+public interface ValidDealRespository extends MongoRepository<ValidDeal, String> {
 
 }

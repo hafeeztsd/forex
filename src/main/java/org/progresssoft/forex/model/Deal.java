@@ -1,7 +1,6 @@
 package org.progresssoft.forex.model;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * Domain model for deal.
@@ -9,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
  * @author hafeeztsd
  *
  */
-@Document(collection = "deals")
+
 public class Deal {
 
 	@Id

@@ -14,14 +14,6 @@ import org.progresssoft.forex.model.Deal;
 public interface DealService {
 
 	/**
-	 * Persist the given deal.
-	 * 
-	 * @param deal
-	 * @return
-	 */
-	Deal save(Deal deal);
-
-	/**
 	 * Load the given file to Database.
 	 * 
 	 * @param is
