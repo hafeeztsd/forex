@@ -1,6 +1,7 @@
 package org.progresssoft.forex.model;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 
 /**
  * Domain model for deal.
@@ -26,16 +27,21 @@ public class Deal {
 
 	/** Deal Amount in ordering currency **/
 	private float amount;
+	@Indexed
+	/** File name or source from where this deals came from. **/
+	private String fileName;
 
 	public Deal() {
 	}
 
-	public Deal(String id, String fromCurrencyCode, String toCurrencyCode, String timestamp, float amount) {
+	public Deal(String id, String fromCurrencyCode, String toCurrencyCode, String timestamp, float amount,
+			String fileName) {
 		this.id = id;
 		this.fromCurrencyCode = fromCurrencyCode;
 		this.toCurrencyCode = toCurrencyCode;
 		this.timestamp = timestamp;
 		this.amount = amount;
+		this.fileName = fileName;
 	}
 
 	public String getId() {

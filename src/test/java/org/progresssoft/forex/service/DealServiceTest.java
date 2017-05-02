@@ -35,6 +35,14 @@ public class DealServiceTest {
 		File file = new File(ClassLoader.getSystemResource(name).getPath());
 		dealService.loadDeals(new FileInputStream(file), name);
 	}
+	//TODO: Accumulative count is not getting updated. need to do OldValue + NewValue
+	// deal_source does not contain the field validDeals Count additionally count is wrong 
+	@Test
+	public void shouldLoadFileIntoValidAndInvalidDeals() throws ForexException, IOException {
+		String name = "small_data_with_valid_invalid_deals.csv";
+		File file = new File(ClassLoader.getSystemResource(name).getPath());
+		dealService.loadDeals(new FileInputStream(file), name);
+	}
 
 	@Test
 	public void shouldThrowErrorForAlreadyUploadedFile() {

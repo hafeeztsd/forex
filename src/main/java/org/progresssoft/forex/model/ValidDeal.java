@@ -9,8 +9,9 @@ public class ValidDeal extends Deal {
 
 	}
 
-	public ValidDeal(String id, String fromCurrencyCode, String toCurrencyCode, String timestamp, float amount) {
-		super(id, fromCurrencyCode, toCurrencyCode, timestamp, amount);
+	public ValidDeal(String id, String fromCurrencyCode, String toCurrencyCode, String timestamp, float amount,
+			String fileName) {
+		super(id, fromCurrencyCode, toCurrencyCode, timestamp, amount, fileName);
 	}
 
 	public boolean isValidDeal() {
