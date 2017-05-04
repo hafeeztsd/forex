@@ -84,10 +84,18 @@ public class Deal {
 		this.amount = amount;
 	}
 
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
 	@Override
 	public String toString() {
 		return "Deal [id=" + id + ", fromCurrencyCode=" + fromCurrencyCode + ", toCurrencyCode=" + toCurrencyCode
-				+ ", timestamp=" + timestamp + ", amount=" + amount + "]";
+				+ ", timestamp=" + timestamp + ", amount=" + amount + ", fileName=" + fileName + "]";
 	}
 
 }

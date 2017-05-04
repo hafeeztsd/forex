@@ -20,5 +20,5 @@ public interface DealService {
 	 * @param source
 	 * @throws ForexException
 	 */
-	void loadDeals(InputStream is,  String source) throws ForexException;
+	boolean loadDeals(InputStream is,  String source) throws ForexException;
 }

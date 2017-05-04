@@ -1,16 +1,21 @@
 package org.progresssoft.forex.repository;
 
-import org.progresssoft.forex.model.Deal;
+import java.util.List;
+
 import org.progresssoft.forex.model.ValidDeal;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 /**
- * Deal repository to interact with mongo db for all kind {@link Deal} related
+ * Deal repository to interact with mongo db for all kind {@link ValidDeal} related
  * operations.
  * 
  * @author hafeeztsd
  *
  */
 public interface ValidDealRespository extends MongoRepository<ValidDeal, String> {
+
+	public List<ValidDeal> findByFileName(String fileName);
+
+	public List<ValidDeal> deleteByFileName(String fileName);
 
 }

@@ -37,7 +37,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class DealServiceImpl implements DealService {
 
-	private static final String EMPTY_VALUE = "";
 	private static final String SEPARATOR = ",";
 	private static final int AMOUNT_INDEX = 4;
 	private static final int TIMESTAMP_INDEX = 3;
@@ -56,7 +55,7 @@ public class DealServiceImpl implements DealService {
 	CurrencyFrequencyRespository currencyFrequencyRespository;
 
 	@Override
-	public void loadDeals(InputStream is, final String source) throws ForexException {
+	public boolean loadDeals(InputStream is, final String source) throws ForexException {
 
 		/**
 		 * Making sure that file has not been processed earlier.
@@ -64,9 +63,9 @@ public class DealServiceImpl implements DealService {
 		 */
 		DealSource dealSource = dealSourceRespository.findOne(source);
 		if (dealSource != null) {
+			LOGGER.log(Level.SEVERE, ForexErrorCode.ALREADY_UPLOADED.getMessage());
 			throw new ForexException(ForexErrorCode.ALREADY_UPLOADED);
 		}
-		
 
 		/**
 		 * Converting Each record of given CSV file into either ValidDeal or
@@ -82,11 +81,8 @@ public class DealServiceImpl implements DealService {
 			List<ValidDeal> validDeals = br.lines().map(line -> {
 
 				String[] deal = line.split(SEPARATOR);
-				return new ValidDeal(deal[DEAL_UNIQUE_ID_INDEX] == null ? EMPTY_VALUE : deal[DEAL_UNIQUE_ID_INDEX],
-						deal[FROM_CURRENCY_INDEX] == null ? EMPTY_VALUE : deal[FROM_CURRENCY_INDEX],
-						deal[TO_CURRENCY_INDEX] == null ? EMPTY_VALUE : deal[TO_CURRENCY_INDEX],
-						deal[TIMESTAMP_INDEX] == null ? EMPTY_VALUE : deal[TIMESTAMP_INDEX],
-						deal.length - 1 >= AMOUNT_INDEX
+				return new ValidDeal(deal[DEAL_UNIQUE_ID_INDEX], deal[FROM_CURRENCY_INDEX], deal[TO_CURRENCY_INDEX],
+						deal[TIMESTAMP_INDEX], deal.length - 1 >= AMOUNT_INDEX
 								? (deal[AMOUNT_INDEX] == null ? 0 : Float.valueOf(deal[AMOUNT_INDEX])) : 0,
 						source);
 
@@ -123,7 +119,7 @@ public class DealServiceImpl implements DealService {
 			LOGGER.log(Level.SEVERE, e.getMessage(), e);
 			throw new ForexException(ForexErrorCode.SYSTEM_ERROR, e);
 		}
-
+		return true;
 	}
 
 	/**

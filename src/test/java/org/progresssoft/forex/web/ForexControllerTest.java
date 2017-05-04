@@ -1,6 +1,5 @@
 package org.progresssoft.forex.web;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.File;
@@ -27,7 +26,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 public class ForexControllerTest {
-	//http://www.mkyong.com/spring-boot/spring-boot-file-upload-example/
+	// http://www.mkyong.com/spring-boot/spring-boot-file-upload-example/
 	@Autowired
 	private ForexController controller;
 
@@ -43,8 +42,8 @@ public class ForexControllerTest {
 		String name = "small_data.csv";
 		File file = new File(ClassLoader.getSystemResource(name).getPath());
 		MockMultipartFile mockFile = new MockMultipartFile("file", FileUtils.readFileToByteArray(file));
-		mockMvc.perform(MockMvcRequestBuilders.fileUpload("/upload").file(mockFile)).andExpect(status().isOk())
-				.andExpect(content().string(("Hello World")));
+		mockMvc.perform(MockMvcRequestBuilders.fileUpload("/upload").file(mockFile))
+				.andExpect(status().is3xxRedirection());
 	}
 
 }

@@ -1,7 +1,6 @@
 package org.progresssoft.forex.model;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.PersistenceConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
@@ -20,14 +19,16 @@ public class DealSource {
 	private Integer invalidDealsCount;
 	private String timestamp;
 
-	@PersistenceConstructor
+	public DealSource(){
+		
+	}
+	
 	public DealSource(String name, Integer totalDealsCount, Integer validDealsCount, Integer invalidDealsCount,
 			String timestamp) {
-		super();
 		this.name = name;
 		this.totalDealsCount = totalDealsCount;
 		this.validDealsCount = validDealsCount;
-		this.validDealsCount = invalidDealsCount;
+		this.invalidDealsCount = invalidDealsCount;
 		this.timestamp = timestamp;
 	}
 

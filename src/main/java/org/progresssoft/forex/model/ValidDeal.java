@@ -1,6 +1,7 @@
 package org.progresssoft.forex.model;
 
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.util.StringUtils;
 
 @Document(collection = "valid_deals")
 public class ValidDeal extends Deal {
@@ -15,8 +16,9 @@ public class ValidDeal extends Deal {
 	}
 
 	public boolean isValidDeal() {
-		return this.getId() != null && this.getFromCurrencyCode() != null && this.getToCurrencyCode() != null
-				&& this.getTimestamp() != null && this.getAmount() > 0;
+		return !StringUtils.isEmpty(this.getId()) && !StringUtils.isEmpty(this.getFromCurrencyCode())
+				&& !StringUtils.isEmpty(this.getToCurrencyCode()) && this.getTimestamp() != null
+				&& this.getAmount() > 0;
 	}
 
 }

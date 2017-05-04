@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 import org.progresssoft.forex.Application;
 import org.progresssoft.forex.exception.ForexErrorCode;
 import org.progresssoft.forex.exception.ForexException;
-import org.progresssoft.forex.service.DealService;
+import org.progresssoft.forex.repository.DealSourceRespository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -29,19 +29,26 @@ public class DealServiceTest {
 	@Autowired
 	DealService dealService;
 
+	@Autowired
+	DealSourceRespository dealSourceRespository;
+
 	@Test
 	public void shouldLoadFile() throws ForexException, IOException {
 		String name = "all_valid_records.csv";
 		File file = new File(ClassLoader.getSystemResource(name).getPath());
-		dealService.loadDeals(new FileInputStream(file), name);
+		boolean uploadStatus = dealService.loadDeals(new FileInputStream(file), name);
+		dealSourceRespository.delete(name);
+		Assert.assertTrue(uploadStatus);
+
 	}
-	//TODO: Accumulative count is not getting updated. need to do OldValue + NewValue
-	// deal_source does not contain the field validDeals Count additionally count is wrong 
+
 	@Test
 	public void shouldLoadFileIntoValidAndInvalidDeals() throws ForexException, IOException {
 		String name = "small_data_with_valid_invalid_deals.csv";
 		File file = new File(ClassLoader.getSystemResource(name).getPath());
-		dealService.loadDeals(new FileInputStream(file), name);
+		boolean uploadStatus = dealService.loadDeals(new FileInputStream(file), name);
+		dealSourceRespository.delete(name);
+		Assert.assertTrue(uploadStatus);
 	}
 
 	@Test
@@ -56,6 +63,8 @@ public class DealServiceTest {
 			Assert.fail(e.getMessage());
 		} catch (ForexException e) {
 			Assert.assertTrue("Error Code mismatch", ForexErrorCode.ALREADY_UPLOADED == e.getForexErrorCode());
+		} finally {
+			dealSourceRespository.delete(name);
 		}
 	}
 
