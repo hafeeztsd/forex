@@ -43,7 +43,7 @@ public class ForexControllerTest {
 		File file = new File(ClassLoader.getSystemResource(name).getPath());
 		MockMultipartFile mockFile = new MockMultipartFile("file", FileUtils.readFileToByteArray(file));
 		mockMvc.perform(MockMvcRequestBuilders.fileUpload("/upload").file(mockFile))
-				.andExpect(status().is3xxRedirection());
+				.andExpect(status().isOk());
 	}
 
 }

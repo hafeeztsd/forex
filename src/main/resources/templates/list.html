@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+	<div layout:fragment="content">
+		<div class="list-group">
+			<table style="border: thin;border-style: solid;">
+				<tr>
+					<th>ID</th>
+					<th>From Currency Code</th>
+					<th>To Currency Code</th>
+					<th>Timestamp</th>
+					<th>Amount</th>
+					<th>File Name</th>
+				</tr>
+				<tr th:each="deal : ${deals}">
+					<td style="text-align: center;" th:text="${deal.id}"></td>
+					<td style="text-align: center;" th:text="${deal.fromCurrencyCode}"></td>
+					<td style="text-align: center;" th:text="${deal.toCurrencyCode}"></td>
+					<td style="text-align: center;"
+						th:text="${deal.timestamp}"></td>
+					<td style="text-align: center;" th:text="${deal.amount}"></td>
+					<td style="text-align: center;" th:text="${deal.fileName}"></td>
+
+				</tr>
+			</table>
+		</div>
+	</div>
+</body>
+</html>
+

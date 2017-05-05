@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.progresssoft.forex.exception.ForexErrorCode;
 import org.progresssoft.forex.exception.ForexException;
 import org.progresssoft.forex.model.CurrencyFrequency;
+import org.progresssoft.forex.model.Deal;
 import org.progresssoft.forex.model.DealSource;
 import org.progresssoft.forex.model.InvalidDeal;
 import org.progresssoft.forex.model.ValidDeal;
@@ -53,6 +54,14 @@ public class DealServiceImpl implements DealService {
 	DealSourceRespository dealSourceRespository;
 	@Autowired
 	CurrencyFrequencyRespository currencyFrequencyRespository;
+
+	@Override
+	public List<Deal> getDealsByFileName(String fileName) {
+		List<Deal> deals = new ArrayList<>(validDealRespository.findByFileName(fileName));
+		deals.addAll(invalidDealRespository.findByFileName(fileName));
+		LOGGER.info("Total deals found for file name = " + fileName + " are = " + deals.size());
+		return deals;
+	}
 
 	@Override
 	public boolean loadDeals(InputStream is, final String source) throws ForexException {
@@ -95,25 +104,44 @@ public class DealServiceImpl implements DealService {
 			Timestamp timestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
 			dealSource = new DealSource(source, (validDeals.size() + invalidDeals.size()), validDeals.size(),
 					invalidDeals.size(), timestamp.toString());
+
+			/**
+			 * Updating Deal Count for Ordering Currecny
+			 */
+			new Thread(new Runnable() {
+
+				public void run() {
+					Timer dealCountTimer = new Timer();
+					dealCountTimer.start();
+
+					List<CurrencyFrequency> storedFrequencies = currencyFrequencyRespository.findAll();
+
+					for (CurrencyFrequency storedFrequency : storedFrequencies) {
+						String key = storedFrequency.getCurrencyCode();
+						if (currencyFrequencyMap.containsKey(key)) {
+							currencyFrequencyMap.put(key,
+									storedFrequency.getCountOfDeals() + currencyFrequencyMap.get(key));
+						}
+					}
+
+					List<CurrencyFrequency> currencyFrequencies = currencyFrequencyMap.entrySet().stream()
+							.map(e -> new CurrencyFrequency(e.getKey(), e.getValue())).collect(Collectors.toList());
+					LOGGER.info("Preparing to add accumulative count for each ordering currecy. Total records are "
+							+ currencyFrequencies.size());
+					currencyFrequencyRespository.save(currencyFrequencies);
+					dealCountTimer.stop();
+					LOGGER.info("Time taken to add/ update the accumulative count for each currency is "
+							+ timer.getMilliSeconds() + " ms, " + dealCountTimer.getSconds() + " seconds.");
+
+				}
+			}).start();
+			
+			
 			dealSourceRespository.save(dealSource);
 			validDealRespository.save(validDeals);
 			invalidDealRespository.save(invalidDeals);
 			timer.stop();
 			LOGGER.info("Time taken to load " + validDeals.size() + " is " + timer.getSconds() + " seconds.");
-
-			/**
-			 * Updating Deal Count for Ordering Currecny
-			 */
-			timer.reset();
-			timer.start();
-			List<CurrencyFrequency> currencyFrequencies = currencyFrequencyMap.entrySet().stream()
-					.map(e -> new CurrencyFrequency(e.getKey(), e.getValue())).collect(Collectors.toList());
-			LOGGER.info("Preparing to add accumulative count for each ordering currecy. Total records are "
-					+ currencyFrequencies.size());
-			currencyFrequencyRespository.save(currencyFrequencies);
-			timer.stop();
-			LOGGER.info("Time taken to add/ update the accumulative count for each currency is "
-					+ timer.getMilliSeconds() + " ms, " + timer.getSconds() + " seconds.");
 
 		} catch (Exception e) {
 			LOGGER.log(Level.SEVERE, e.getMessage(), e);
