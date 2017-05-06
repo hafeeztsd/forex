@@ -16,9 +16,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
-
-import org.progresssoft.forex.config.ApplicationProperties;
+import org.progresssoft.forex.exception.ForexErrorCode;
+import org.progresssoft.forex.exception.ForexException;
 import org.progresssoft.forex.model.Deal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -38,9 +37,6 @@ public class DataGenerator {
 	private static final int TOTAL_CURRENCY_CODES = 180;
 
 	@Autowired
-	private ApplicationProperties applicationProperties;
-
-	@Autowired
 	Environment environment;
 
 	private List<String> currencyCodes;
@@ -51,8 +47,7 @@ public class DataGenerator {
 	 * @return {@link File}
 	 */
 	public File generateDataFile() throws Exception {
-		String fileName = new StringBuilder(applicationProperties.getDataFileDirectoryPath()).append("/")
-				.append(System.nanoTime()).append(".").append(applicationProperties.getFileFormat()).toString();
+		String fileName = new StringBuilder().append(System.nanoTime()).append(".csv").toString();
 		File file = new File(fileName);
 		String maxRecords = environment.getProperty("max.record.count");
 		Integer recordsInDataFile = maxRecords == null ? MAX_RECORDS : Integer.valueOf(maxRecords);
@@ -65,7 +60,6 @@ public class DataGenerator {
 		return file;
 	}
 
-	@PostConstruct
 	public void loadCurrencyCodes() throws URISyntaxException, IOException {
 		Stream<String> stream = null;
 		try {
@@ -88,7 +82,14 @@ public class DataGenerator {
 	 * 
 	 * @return {@link Deal}
 	 */
-	private String createDealAsString() {
+	private String createDealAsString() throws ForexException {
+		if (currencyCodes == null) {
+			try {
+				loadCurrencyCodes();
+			} catch (Exception e) {
+				throw new ForexException(ForexErrorCode.SYSTEM_ERROR, e);
+			}
+		}
 		Random random = new Random();
 		StringBuilder deal = new StringBuilder();
 		deal.append(String.valueOf(UUID.randomUUID())).append(FIELD_SEPARATOR);

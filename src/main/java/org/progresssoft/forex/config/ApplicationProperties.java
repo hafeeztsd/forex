@@ -20,10 +20,6 @@ public class ApplicationProperties {
 	private String dbHost;
 	@Value("${spring.data.mongodb.port}")
 	private Integer dbPort;
-	@Value("${data.file.directory.path}")
-	private String dataFileDirectoryPath;
-	@Value("${data.file.format}")
-	private String fileFormat;
 	
 	public String getName() {
 		return name;
@@ -41,18 +37,12 @@ public class ApplicationProperties {
 		return dbPort;
 	}
 
-	public String getDataFileDirectoryPath() {
-		return dataFileDirectoryPath;
-	}
-
-	public String getFileFormat() {
-		return fileFormat;
-	}
-
 	@Override
 	public String toString() {
 		return "ApplicationProperties [name=" + name + ", dbName=" + dbName + ", dbHost=" + dbHost + ", dbPort="
-				+ dbPort + ", dataFileDirectoryPath=" + dataFileDirectoryPath + ", fileFormat=" + fileFormat + "]";
+				+ dbPort + "]";
 	}
+
+	
 
 }
